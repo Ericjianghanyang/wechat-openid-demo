@@ -1,11 +1,11 @@
 const crypto = require('crypto');
 
-// 微信配置
+// 微信配置 - 从环境变量获取
 const config = {
   wechat: {
-    appId: 'wxe877716401fdb4c9',
-    appSecret: 'ba18b658d81d63bdcd60a01d9fa0b3d8',
-    token: 'mytoken123',
+    appId: process.env.WECHAT_APP_ID,
+    appSecret: process.env.WECHAT_APP_SECRET,
+    token: process.env.WECHAT_TOKEN,
   }
 };
 
@@ -42,6 +42,7 @@ exports.handler = async (event, context) => {
         const hash = sha1.digest('hex');
 
         console.log('微信验证参数:', { signature, timestamp, nonce, echostr, hash });
+        console.log('使用的Token:', token);
 
         if (hash === signature) {
           console.log('微信服务器验证成功');
