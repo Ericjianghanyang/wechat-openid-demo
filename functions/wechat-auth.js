@@ -29,40 +29,43 @@ exports.handler = async (event, context) => {
   try {
     const { signature, timestamp, nonce, echostr } = event.queryStringParameters || {};
 
-    // 如果是GET请求且有echostr，说明是微信验证
-    if (event.httpMethod === 'GET' && echostr) {
-      // 验证签名
-      const token = config.wechat.token;
-      const tmpArr = [token, timestamp, nonce].sort();
-      const tmpStr = tmpArr.join('');
-      const sha1 = crypto.createHash('sha1');
-      sha1.update(tmpStr);
-      const hash = sha1.digest('hex');
+    // 如果是GET请求，尝试微信验证
+    if (event.httpMethod === 'GET') {
+      // 检查是否有微信验证所需的参数
+      if (signature && timestamp && nonce) {
+        // 验证签名
+        const token = config.wechat.token;
+        const tmpArr = [token, timestamp, nonce].sort();
+        const tmpStr = tmpArr.join('');
+        const sha1 = crypto.createHash('sha1');
+        sha1.update(tmpStr);
+        const hash = sha1.digest('hex');
 
-      if (hash === signature) {
-        console.log('微信服务器验证成功');
+        console.log('微信验证参数:', { signature, timestamp, nonce, echostr, hash });
+
+        if (hash === signature) {
+          console.log('微信服务器验证成功');
+          return {
+            statusCode: 200,
+            headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+            body: echostr || 'success'
+          };
+        } else {
+          console.log('微信服务器验证失败');
+          return {
+            statusCode: 403,
+            headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+            body: '验证失败'
+          };
+        }
+      } else {
+        // 没有验证参数，返回说明
         return {
           statusCode: 200,
           headers: { 'Content-Type': 'text/plain; charset=utf-8' },
-          body: echostr
-        };
-      } else {
-        console.log('微信服务器验证失败');
-        return {
-          statusCode: 403,
-          headers: { 'Content-Type': 'text/plain; charset=utf-8' },
-          body: '验证失败'
+          body: '微信验证接口 - 请提供正确的验证参数'
         };
       }
-    }
-
-    // 如果是GET请求但没有echostr，返回说明
-    if (event.httpMethod === 'GET' && !echostr) {
-      return {
-        statusCode: 200,
-        headers: { 'Content-Type': 'text/plain; charset=utf-8' },
-        body: '微信验证接口 - 请提供正确的验证参数'
-      };
     }
 
     // 处理POST请求（微信消息）
