@@ -29,7 +29,7 @@ exports.handler = async (event, context) => {
   try {
     const { signature, timestamp, nonce, echostr } = event.queryStringParameters || {};
 
-    // 如果是GET请求且没有echostr，说明是微信验证
+    // 如果是GET请求且有echostr，说明是微信验证
     if (event.httpMethod === 'GET' && echostr) {
       // 验证签名
       const token = config.wechat.token;
@@ -43,17 +43,26 @@ exports.handler = async (event, context) => {
         console.log('微信服务器验证成功');
         return {
           statusCode: 200,
-          headers: { 'Content-Type': 'text/plain' },
+          headers: { 'Content-Type': 'text/plain; charset=utf-8' },
           body: echostr
         };
       } else {
         console.log('微信服务器验证失败');
         return {
           statusCode: 403,
-          headers: { 'Content-Type': 'text/plain' },
+          headers: { 'Content-Type': 'text/plain; charset=utf-8' },
           body: '验证失败'
         };
       }
+    }
+
+    // 如果是GET请求但没有echostr，返回说明
+    if (event.httpMethod === 'GET' && !echostr) {
+      return {
+        statusCode: 200,
+        headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+        body: '微信验证接口 - 请提供正确的验证参数'
+      };
     }
 
     // 处理POST请求（微信消息）
