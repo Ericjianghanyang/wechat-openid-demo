@@ -9,6 +9,7 @@
   from = "/wechat/auth"
   to = "/.netlify/functions/wechat-auth"
   status = 200
+  force = true
 
 [[redirects]]
   from = "/api/*"
