@@ -3,9 +3,9 @@ const crypto = require('crypto');
 // 微信配置
 const config = {
   wechat: {
-    appId: process.env.WECHAT_APP_ID || 'wxe877716401fdb4c9',
-    appSecret: process.env.WECHAT_APP_SECRET || 'ba18b658d81d63bdcd60a01d9fa0b3d8',
-    token: process.env.WECHAT_TOKEN || 'mytoken123',
+    appId: 'wxe877716401fdb4c9',
+    appSecret: 'ba18b658d81d63bdcd60a01d9fa0b3d8',
+    token: 'mytoken123',
   }
 };
 
