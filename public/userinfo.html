@@ -198,7 +198,7 @@
                 }
                 
                 // 第一步：通过code获取openid
-                const openidResponse = await fetch(`/api/get-openid?code=${code}`);
+                const openidResponse = await fetch(`/.netlify/functions/api/get-openid?code=${code}`);
                 const openidData = await openidResponse.json();
                 
                 if (!openidData.success) {
@@ -207,7 +207,7 @@
                 }
                 
                 // 第二步：通过openid和access_token获取用户信息
-                const userInfoResponse = await fetch(`/api/get-user-info?openid=${openidData.openid}&access_token=${openidData.access_token}`);
+                const userInfoResponse = await fetch(`/.netlify/functions/api/get-user-info?openid=${openidData.openid}&access_token=${openidData.access_token}`);
                 const userInfoData = await userInfoResponse.json();
                 
                 if (!userInfoData.success) {
