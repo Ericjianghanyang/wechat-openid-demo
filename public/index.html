@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>微信服务号开发测试</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .status {
+            background: #e8f5e8;
+            border: 1px solid #4caf50;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            color: #2e7d32;
+        }
+        
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+        
+        .info {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        
+        .info h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .info ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        
+        .info li {
+            margin: 5px 0;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 微信服务号开发测试</h1>
+        
+        <div class="status">
+            ✅ 服务器运行正常！<br>
+            当前时间: <span id="current-time"></span>
+        </div>
+        
+        <div class="info">
+            <h3>📋 配置检查清单</h3>
+            <ul>
+                <li>✅ 服务器已启动</li>
+                <li>⚠️ 需要配置微信公众平台</li>
+                <li>⚠️ 需要HTTPS证书</li>
+                <li>⚠️ 需要公网域名</li>
+            </ul>
+        </div>
+        
+        <div class="info">
+            <h3>🔧 下一步操作</h3>
+            <ul>
+                <li>1. 修改 config.js 中的 AppID 和 AppSecret</li>
+                <li>2. 在微信公众平台配置服务器地址</li>
+                <li>3. 配置自定义菜单指向 userinfo.html</li>
+                <li>4. 确保域名有HTTPS证书</li>
+                <li>5. 测试微信菜单跳转</li>
+            </ul>
+        </div>
+        
+        <a href="/userinfo.html" class="btn">测试用户信息页面</a>
+        <a href="/wechat/auth" class="btn">测试微信验证接口</a>
+    </div>
+
+    <script>
+        // 显示当前时间
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('current-time').textContent = now.toLocaleString('zh-CN');
+        }
+        
+        updateTime();
+        setInterval(updateTime, 1000);
+    </script>
+</body>
+</html> 

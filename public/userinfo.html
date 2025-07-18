@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>微信用户信息</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            border: 4px solid #667eea;
+            object-fit: cover;
+        }
+        
+        .nickname {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .info-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            text-align: left;
+        }
+        
+        .info-label {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+        
+        .info-value {
+            color: #666;
+            word-break: break-all;
+        }
+        
+        .loading {
+            color: #667eea;
+            font-size: 18px;
+        }
+        
+        .error {
+            color: #e74c3c;
+            background: #fdf2f2;
+            border: 1px solid #fecaca;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+        
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="loading" class="loading">
+            <p>正在获取用户信息...</p>
+        </div>
+        
+        <div id="error" class="error" style="display: none;">
+            <p id="error-message"></p>
+        </div>
+        
+        <div id="user-info" style="display: none;">
+            <img id="user-avatar" class="avatar" src="" alt="用户头像">
+            <div id="user-nickname" class="nickname"></div>
+            
+            <div class="info-item">
+                <div class="info-label">OpenID</div>
+                <div id="user-openid" class="info-value"></div>
+            </div>
+            
+            <div class="info-item">
+                <div class="info-label">性别</div>
+                <div id="user-sex" class="info-value"></div>
+            </div>
+            
+            <div class="info-item">
+                <div class="info-label">地区</div>
+                <div id="user-location" class="info-value"></div>
+            </div>
+            
+            <div class="info-item">
+                <div class="info-label">个人签名</div>
+                <div id="user-signature" class="info-value"></div>
+            </div>
+            
+            <button class="btn" onclick="refreshUserInfo()">刷新信息</button>
+        </div>
+    </div>
+
+    <script>
+        // 获取URL参数
+        function getUrlParam(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+        
+        // 显示错误信息
+        function showError(message) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error').style.display = 'block';
+            document.getElementById('error-message').textContent = message;
+        }
+        
+        // 显示用户信息
+        function showUserInfo(userInfo) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('user-info').style.display = 'block';
+            
+            // 设置头像
+            const avatar = document.getElementById('user-avatar');
+            avatar.src = userInfo.headimgurl || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDEyMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMjAiIGhlaWdodD0iMTIwIiByeD0iNjAiIGZpbGw9IiNEN0Q3RDciLz4KPHN2ZyB4PSIzMCIgeT0iMjAiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSIjOTk5OTk5Ij4KPHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bTAgM2MyLjY3IDAgNC44NCAyLjE3IDQuODQgNC44NCAwIDIuNjctMi4xNyA0Ljg0LTQuODQgNC44NC0yLjY3IDAtNC44NC0yLjE3LTQuODQtNC44NCAwLTIuNjcgMi4xNy00Ljg0IDQuODQtNC44NHptMCAxMmM0LjQyIDAgOC4xNy0yLjE3IDEwLjU5LTUuNzQtLjU5LTMuNTctMy43Ny02LjI2LTcuNTktNi4yNi0zLjgyIDAtNyA2LjY5LTcuNTkgNi4yNiAyLjQyIDMuNTcgNi4xNyA1Ljc0IDEwLjU5IDUuNzR6Ii8+Cjwvc3ZnPgo8L3N2Zz4K';
+            
+            // 设置昵称
+            document.getElementById('user-nickname').textContent = userInfo.nickname || '未知用户';
+            
+            // 设置OpenID
+            document.getElementById('user-openid').textContent = userInfo.openid || '未知';
+            
+            // 设置性别
+            const sexMap = { '1': '男', '2': '女', '0': '未知' };
+            document.getElementById('user-sex').textContent = sexMap[userInfo.sex] || '未知';
+            
+            // 设置地区
+            const location = [];
+            if (userInfo.country) location.push(userInfo.country);
+            if (userInfo.province) location.push(userInfo.province);
+            if (userInfo.city) location.push(userInfo.city);
+            document.getElementById('user-location').textContent = location.length > 0 ? location.join(' ') : '未知';
+            
+            // 设置个人签名
+            document.getElementById('user-signature').textContent = userInfo.signature || '暂无签名';
+        }
+        
+        // 获取用户信息
+        async function getUserInfo() {
+            try {
+                // 从URL获取code
+                const code = getUrlParam('code');
+                
+                if (!code) {
+                    showError('未找到授权码，请从微信菜单重新进入');
+                    return;
+                }
+                
+                // 第一步：通过code获取openid
+                const openidResponse = await fetch(`/api/get-openid?code=${code}`);
+                const openidData = await openidResponse.json();
+                
+                if (!openidData.success) {
+                    showError('获取OpenID失败: ' + (openidData.error || '未知错误'));
+                    return;
+                }
+                
+                // 第二步：通过openid和access_token获取用户信息
+                const userInfoResponse = await fetch(`/api/get-user-info?openid=${openidData.openid}&access_token=${openidData.access_token}`);
+                const userInfoData = await userInfoResponse.json();
+                
+                if (!userInfoData.success) {
+                    showError('获取用户信息失败: ' + (userInfoData.error || '未知错误'));
+                    return;
+                }
+                
+                // 显示用户信息
+                showUserInfo(userInfoData.userInfo);
+                
+            } catch (error) {
+                console.error('获取用户信息错误:', error);
+                showError('网络错误，请稍后重试');
+            }
+        }
+        
+        // 刷新用户信息
+        function refreshUserInfo() {
+            location.reload();
+        }
+        
+        // 页面加载时获取用户信息
+        window.onload = getUserInfo;
+    </script>
+</body>
+</html> 
